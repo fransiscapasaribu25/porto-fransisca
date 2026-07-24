@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fransisca Agnes — Signal / Interface</title>
+<meta name="description" content="Portofolio Fransisca Agnes Monalisa Pasaribu — UI/UX Designer">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#061527;
+    --navy:#0B2038;
+    --blue-panel:#0F2A47;
+    --blue-mid:#173A5E;
+    --electric:#2F6FED;
+    --cyan:#4CD6E8;
+    --paper:#F4F8FC;
+    --ink:#0B1E33;
+    --slate:#7C93B3;
+    --slate-dim:#4A5F7D;
+    --ok:#4CD6A0;
+    --line: rgba(76,214,232,0.18);
+    --radius: 2px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--navy-deep);
+    color:var(--paper);
+    font-family:'Inter', sans-serif;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  ::selection{ background:var(--electric); color:#fff; }
+  a{color:inherit;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+  .display{font-family:'Space Grotesk', sans-serif;}
+
+  /* ---------- scanline / grid texture ---------- */
+  .grid-tex{
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    opacity:0.35;
+    mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 0%, transparent 75%);
+  }
+
+  /* ---------- top status bar ---------- */
+  .statusbar{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 28px;
+    background:linear-gradient(180deg, rgba(6,21,39,0.92), rgba(6,21,39,0));
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px; letter-spacing:0.08em;
+    color:var(--slate);
+    pointer-events:none;
+  }
+  .statusbar span.dot{
+    display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:var(--ok); margin-right:8px;
+    box-shadow:0 0 8px var(--ok);
+    animation:blink 2.4s ease-in-out infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+
+  /* ---------- flow rail (desktop) ---------- */
+  .rail{
+    position:fixed; left:28px; top:0; bottom:0; width:26px; z-index:40;
+    display:none;
+  }
+  .rail svg{ position:absolute; left:8px; top:0; height:100%; width:2px; }
+  .rail .zones{ position:relative; height:100%; }
+  .zone-dot{
+    position:absolute; left:0; width:18px; height:18px; margin-left:-8px;
+    display:flex; align-items:center; justify-content:center;
+    transform:translateY(-50%);
+  }
+  .zone-dot::before{
+    content:''; width:8px; height:8px; border-radius:50%;
+    background:var(--slate-dim); transition:background .4s, box-shadow .4s;
+  }
+  .zone-dot.active::before{
+    background:var(--cyan); box-shadow:0 0 10px var(--cyan);
+  }
+
+  @media (min-width:1100px){ .rail{ display:block; } }
+
+  /* ---------- section shell ---------- */
+  section{
+    position:relative; z-index:1;
+    padding:120px 8vw;
+    max-width:1180px; margin:0 auto;
+  }
+  .zone-tag{
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px; letter-spacing:0.14em; color:var(--cyan);
+    text-transform:uppercase; margin-bottom:22px;
+  }
+  .zone-tag::before{
+    content:''; width:22px; height:1px; background:var(--cyan);
+  }
+
+  h1,h2,h3{ font-family:'Space Grotesk', sans-serif; font-weight:600; }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    min-height:100vh; display:flex; align-items:center;
+    padding-top:160px; padding-bottom:80px;
+  }
+  .hero-grid{
+    display:grid; grid-template-columns:1.3fr 0.9fr; gap:64px; align-items:center; width:100%;
+  }
+  @media (max-width:900px){ .hero-grid{ grid-template-columns:1fr; } .hero{padding-top:120px;} }
+
+  .hero-eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.16em;
+    color:var(--slate); text-transform:uppercase; margin-bottom:20px;
+  }
+  .hero h1{
+    font-size:clamp(2.6rem, 6vw, 4.6rem);
+    line-height:1.02; letter-spacing:-0.01em;
+    color:#fff;
+  }
+  .hero h1 .accent{ color:var(--cyan); }
+  .hero p.lede{
+    margin-top:26px; max-width:52ch; color:var(--slate);
+    font-size:1.05rem;
+  }
+  .hero-cta{ margin-top:38px; display:flex; gap:16px; flex-wrap:wrap; }
+  .btn{
+    font-family:'JetBrains Mono', monospace; font-size:12.5px; letter-spacing:0.06em;
+    padding:14px 22px; border-radius:var(--radius);
+    text-decoration:none; display:inline-flex; align-items:center; gap:10px;
+    transition:transform .25s, box-shadow .25s, background .25s;
+    text-transform:uppercase;
+  }
+  .btn-primary{ background:var(--electric); color:#fff; }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 10px 30px -8px rgba(47,111,237,0.6); }
+  .btn-ghost{ border:1px solid var(--line); color:var(--paper); background:transparent; }
+  .btn-ghost:hover{ border-color:var(--cyan); color:var(--cyan); }
+
+  /* portrait module */
+  .portrait-wrap{ position:relative; display:flex; justify-content:center; }
+  .portrait-frame{
+    position:relative; width:min(340px, 80vw); aspect-ratio:2/2.62;
+    border-radius:6px; overflow:hidden;
+    border:1px solid var(--line);
+    background:var(--blue-panel);
+  }
+  .portrait-frame img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    filter:saturate(0.92) contrast(1.03);
+  }
+  .scan{
+    position:absolute; left:0; right:0; height:38%;
+    background:linear-gradient(180deg, rgba(76,214,232,0) 0%, rgba(76,214,232,0.16) 50%, rgba(76,214,232,0) 100%);
+    animation:scan 5.5s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes scan{ 0%{ top:-40%; } 100%{ top:100%; } }
+  .portrait-tag{
+    position:absolute; bottom:10px; left:10px; right:10px;
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:0.05em;
+    color:var(--cyan); background:rgba(6,21,39,0.55); backdrop-filter:blur(4px);
+    padding:7px 10px; border-radius:2px; border:1px solid var(--line);
+  }
+  .portrait-tag .dot{ width:6px; height:6px; border-radius:50%; background:var(--ok); box-shadow:0 0 6px var(--ok); animation:blink 2.4s ease-in-out infinite; }
+  .corner{ position:absolute; width:16px; height:16px; border:1px solid var(--cyan); opacity:0.7; }
+  .corner.tl{ top:-1px; left:-1px; border-right:none; border-bottom:none; }
+  .corner.br{ bottom:-1px; right:-1px; border-left:none; border-top:none; }
+
+  /* ---------- readouts (about stats) ---------- */
+  .readouts{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+    background:var(--line); border:1px solid var(--line); margin-top:44px;
+    border-radius:4px; overflow:hidden;
+  }
+  @media (max-width:700px){ .readouts{ grid-template-columns:repeat(2,1fr); } }
+  .readout{ background:var(--navy); padding:22px 18px; }
+  .readout .val{ font-family:'Space Grotesk', sans-serif; font-size:2.1rem; color:#fff; }
+  .readout .val .unit{ font-size:1rem; color:var(--slate); }
+  .readout .lbl{ font-family:'JetBrains Mono', monospace; font-size:10.5px; letter-spacing:0.08em; color:var(--slate); text-transform:uppercase; margin-top:6px; }
+
+  .about-copy{ max-width:64ch; color:var(--slate); font-size:1.02rem; }
+  .about-copy strong{ color:var(--paper); font-weight:600; }
+
+  /* ---------- project cards ---------- */
+  .proj-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:8px; }
+  @media (max-width:840px){ .proj-grid{ grid-template-columns:1fr; } }
+  .proj-card{
+    border:1px solid var(--line); border-radius:6px; background:var(--blue-panel);
+    padding:30px; cursor:pointer; transition:border-color .3s, transform .3s;
+    position:relative; overflow:hidden;
+  }
+  .proj-card:hover{ border-color:var(--cyan); transform:translateY(-4px); }
+  .proj-card .idx{ font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--cyan); letter-spacing:0.1em; }
+  .proj-card h3{ font-size:1.5rem; color:#fff; margin-top:14px; }
+  .proj-card .role{ color:var(--slate); font-size:0.92rem; margin-top:6px; font-family:'JetBrains Mono', monospace; }
+  .proj-tags{ display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+  .tag{
+    font-family:'JetBrains Mono', monospace; font-size:10.5px; letter-spacing:0.04em;
+    padding:5px 10px; border:1px solid var(--line); border-radius:20px; color:var(--slate);
+  }
+  .proj-detail{
+    max-height:0; overflow:hidden; transition:max-height .45s ease;
+  }
+  .proj-card.open .proj-detail{ max-height:260px; margin-top:18px; }
+  .proj-detail ul{ list-style:none; padding-top:14px; border-top:1px solid var(--line); }
+  .proj-detail li{ position:relative; padding-left:18px; margin-bottom:10px; color:var(--slate); font-size:0.94rem; }
+  .proj-detail li::before{ content:'›'; position:absolute; left:0; color:var(--cyan); }
+  .proj-toggle{
+    margin-top:18px; font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--cyan);
+    display:flex; align-items:center; gap:6px;
+  }
+  .proj-toggle .chev{ transition:transform .35s; }
+  .proj-card.open .proj-toggle .chev{ transform:rotate(90deg); }
+
+  /* ---------- experience log ---------- */
+  .log{ border-left:1px solid var(--line); padding-left:28px; margin-top:36px; position:relative; }
+  .log-entry{ position:relative; padding-bottom:8px; }
+  .log-entry::before{
+    content:''; position:absolute; left:-33px; top:4px; width:9px; height:9px; border-radius:50%;
+    background:var(--navy-deep); border:2px solid var(--cyan);
+  }
+  .log-head{ display:flex; flex-wrap:wrap; align-items:baseline; gap:14px; }
+  .log-head h3{ color:#fff; font-size:1.3rem; }
+  .log-head .dur{ font-family:'JetBrains Mono', monospace; color:var(--slate); font-size:12px; }
+  .log-org{ color:var(--cyan); font-family:'JetBrains Mono', monospace; font-size:13px; margin-top:6px; }
+  .log-list{ list-style:none; margin-top:16px; max-width:62ch; }
+  .log-list li{ position:relative; padding-left:20px; margin-bottom:10px; color:var(--slate); }
+  .log-list li::before{ content:'▸'; position:absolute; left:0; color:var(--cyan); font-size:11px; top:3px; }
+
+  /* ---------- skills ---------- */
+  .tabs{ display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; margin-bottom:32px; }
+  .tab-btn{
+    font-family:'JetBrains Mono', monospace; font-size:11.5px; letter-spacing:0.05em;
+    padding:10px 18px; border:1px solid var(--line); border-radius:20px; background:transparent;
+    color:var(--slate); cursor:pointer; transition:all .25s; text-transform:uppercase;
+  }
+  .tab-btn.active{ border-color:var(--cyan); color:var(--cyan); background:rgba(76,214,232,0.08); }
+  .skill-panel{ display:none; }
+  .skill-panel.active{ display:flex; flex-wrap:wrap; gap:12px; }
+  .chip{
+    font-family:'JetBrains Mono', monospace; font-size:12.5px;
+    padding:12px 18px; border:1px solid var(--line); border-radius:4px; color:var(--paper);
+    background:var(--blue-panel); transition:transform .25s, border-color .25s;
+  }
+  .chip:hover{ transform:translateY(-2px); border-color:var(--cyan); }
+
+  /* ---------- education ---------- */
+  .edu-card{
+    border:1px solid var(--line); border-radius:6px; padding:32px; margin-top:36px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;
+    background:var(--blue-panel);
+  }
+  .edu-card h3{ color:#fff; font-size:1.4rem; }
+  .edu-card .org{ color:var(--slate); font-family:'JetBrains Mono', monospace; font-size:13px; margin-top:6px; }
+  .gpa-ring{
+    width:96px; height:96px; border-radius:50%; position:relative;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    background: conic-gradient(var(--cyan) calc(3.5/4*360deg), var(--line) 0);
+  }
+  .gpa-ring::before{ content:''; position:absolute; inset:6px; border-radius:50%; background:var(--navy-deep); }
+  .gpa-ring span{ position:relative; font-family:'Space Grotesk', sans-serif; color:#fff; font-size:1.2rem; }
+
+  /* ---------- footer / contact ---------- */
+  footer{
+    padding:120px 8vw 60px; position:relative; z-index:1;
+  }
+  .contact-panel{
+    border:1px solid var(--line); border-radius:8px; padding:52px;
+    background:linear-gradient(135deg, var(--blue-panel), var(--navy));
+    text-align:center;
+  }
+  .contact-panel h2{ font-size:clamp(1.8rem, 4vw, 2.6rem); color:#fff; }
+  .contact-panel .status-line{
+    display:inline-flex; align-items:center; gap:8px; margin-top:18px;
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--ok);
+    letter-spacing:0.08em; text-transform:uppercase;
+  }
+  .contact-data{
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    margin-top:28px;
+  }
+  .contact-data-row{
+    display:flex; align-items:center; gap:12px; font-size:13px; letter-spacing:0.02em;
+  }
+  .contact-data-row .cd-lbl{
+    color:var(--slate); font-size:10.5px; letter-spacing:0.12em;
+    border:1px solid var(--line); border-radius:20px; padding:5px 10px;
+  }
+  .contact-data-row a{
+    color:var(--cyan); text-decoration:none; border-bottom:1px solid transparent;
+    transition:border-color .25s;
+  }
+  .contact-data-row a:hover{ border-color:var(--cyan); }
+
+  .contact-links{
+    display:flex; justify-content:center; gap:16px; flex-wrap:wrap; margin-top:28px;
+  }
+  .footnote{
+    margin-top:70px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--slate-dim);
+  }
+
+  .reveal{ opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="grid-tex"></div>
+
+<div class="statusbar">
+  <div><span class="dot"></span>SYSTEM ONLINE // BOGOR, ID</div>
+  <div class="mono" id="clock-label">MONITORING — DESAIN ANTARMUKA</div>
+</div>
+
+<nav class="rail" aria-hidden="true">
+  <svg viewBox="0 0 2 100" preserveAspectRatio="none">
+    <line x1="1" y1="0" x2="1" y2="100" stroke="var(--line)" stroke-width="2" vector-effect="non-scaling-stroke"/>
+  </svg>
+  <div class="zones" id="rail-zones"></div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="zone-hero" data-zone="HERO">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-eyebrow">Z-00 // PROFIL AKTIF</div>
+      <h1>FRANSISCA AGNES<br><span class="accent">— MEMBACA SINYAL,</span><br>MERANCANG ALUR.</h1>
+      <p class="lede">Mahasiswa Sistem Informasi yang terbiasa membaca data mentah dari sistem SCADA, dan kini menyalurkan cara berpikir yang sama untuk merancang antarmuka digital: mengubah sesuatu yang rumit menjadi sesuatu yang mudah dipahami.</p>
+      <div class="hero-cta">
+        <a href="#zone-proyek" class="btn btn-primary">Lihat Proyek →</a>
+        <a href="CV_FransiscaAgnes_Improved.pdf" class="btn btn-ghost">CV Saya </a>
+      </div>
+    </div>
+    <div class="portrait-wrap">
+      <div class="portrait-frame">
+        <span class="corner tl"></span><span class="corner br"></span>
+        <img src="PHOTO-2026-07-24-11-45-47.jpg" alt="Foto Fransisca Agnes Monalisa Pasaribu">
+        <div class="scan"></div>
+        <div class="portrait-tag"><span><span class="dot"></span>FEED-01 LIVE</span><span>UI/UX DESIGNER</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TENTANG ================= -->
+<section id="zone-tentang" data-zone="TENTANG">
+  <div class="zone-tag">Z-01 // Tentang</div>
+  <h2 class="reveal" style="font-size:clamp(1.8rem,3.6vw,2.6rem); color:#fff; max-width:20ch;">Dua panel monitor, satu cara berpikir.</h2>
+  <p class="about-copy reveal" style="margin-top:22px;">Saat ini menempuh semester 6 <strong>Sistem Informasi</strong> di Institut Bisnis Informatika Kesatuan. Ketertarikan pada <strong>UI/UX design</strong> tumbuh berdampingan dengan pengalaman nyata memantau data distribusi air berbasis SCADA — dua hal yang sekilas berbeda, tapi sama-sama soal membaca pola dan menyampaikannya dengan jelas. Detail-oriented, ingin tahu, dan selalu mencari alat baru untuk dipelajari.</p>
+
+  <div class="readouts reveal">
+    <div class="readout">
+      <div class="val">3.5<span class="unit">/4.0</span></div>
+      <div class="lbl">IPK Berjalan</div>
+    </div>
+    <div class="readout">
+      <div class="val">06</div>
+      <div class="lbl">Semester Aktif</div>
+    </div>
+    <div class="readout">
+      <div class="val">2</div>
+      <div class="lbl">Proyek Web Utama</div>
+    </div>
+    <div class="readout">
+      <div class="val">6<span class="unit">bln</span></div>
+      <div class="lbl">Pengalaman SCADA</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROYEK ================= -->
+<section id="zone-proyek" data-zone="PROYEK">
+  <div class="zone-tag">Z-02 // Proyek</div>
+  <h2 class="reveal" style="font-size:clamp(1.8rem,3.6vw,2.6rem); color:#fff;">Dari wireframe ke sesuatu yang bisa dipakai.</h2>
+
+  <div class="proj-grid reveal" style="margin-top:36px;">
+    <div class="proj-card" data-card>
+      <div class="idx">PROYEK / 01</div>
+      <h3>GoHijau</h3>
+      <div class="role">Desain &amp; Pengembangan Website — End to End</div>
+      <div class="proj-tags">
+        <span class="tag">Wireframe</span><span class="tag">UI Design</span><span class="tag">Front-end</span><span class="tag">Responsive</span>
+      </div>
+      <div class="proj-actions" style="margin-top:18px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+        <div class="proj-toggle"><span class="chev">›</span> Lihat detail</div>
+        <a href="GoHijau_Presentasi.pptx" download="GoHijau_Presentasi.pptx" class="btn btn-ghost" style="padding:6px 14px; font-size:11px;" onclick="event.stopPropagation();">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download PPT
+        </a>
+      </div>
+      <div class="proj-detail">
+        <ul>
+          <li>Merancang dan membangun website GoHijau secara menyeluruh, dari wireframe hingga situs yang responsif dan berfungsi penuh.</li>
+          <li>Menerapkan prinsip UI/UX — hierarki tata letak, alur navigasi, dan konsistensi visual — untuk pengalaman pengguna yang intuitif.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="proj-card" data-card>
+      <div class="idx">PROYEK / 02</div>
+      <h3>PMKRI Bogor</h3>
+      <div class="role">Kolaborasi Desain Website Organisasi</div>
+      <div class="proj-tags">
+        <span class="tag">UI Design</span><span class="tag">Kolaborasi Tim</span><span class="tag">Page Layout</span>
+      </div>
+      <div class="proj-actions" style="margin-top:18px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+        <div class="proj-toggle"><span class="chev">›</span> Lihat detail</div>
+        <a href="https://bogor.pmkri.id/" target="_blank" rel="noopener" class="btn btn-ghost" style="padding:6px 14px; font-size:11px;" onclick="event.stopPropagation();">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Kunjungi Link ↗️
+        </a>
+      </div>
+      <div class="proj-detail">
+        <ul>
+          <li>Berkolaborasi dalam desain dan pengembangan website PMKRI Bogor (Perhimpunan Mahasiswa Katolik Republik Indonesia).</li>
+          <li>Berkontribusi pada desain UI dan tata letak halaman untuk memperbaiki navigasi dan tampilan kehadiran organisasi secara daring.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PENGALAMAN ================= -->
+<section id="zone-pengalaman" data-zone="PENGALAMAN">
+  <div class="zone-tag">Z-03 // Pengalaman</div>
+  <h2 class="reveal" style="font-size:clamp(1.8rem,3.6vw,2.6rem); color:#fff;">Sebelum merancang antarmuka, saya memantau sinyal.</h2>
+
+  <div class="log reveal">
+    <div class="log-entry">
+      <div class="log-head">
+        <h3>Data Analyst Intern — Pemantauan Zona Distribusi Air (SCADA)</h3>
+        <span class="dur">// 6 BULAN</span>
+      </div>
+      <div class="log-org">PDAM Tirta Pakuan Kota Bogor · Bogor, Indonesia</div>
+      <ul class="log-list">
+        <li>Memantau dan menganalisis data distribusi air secara real-time melalui sistem SCADA.</li>
+        <li>Mendeteksi anomali dan ketidakwajaran aliran air di berbagai zona pemantauan.</li>
+        <li>Menyusun laporan harian &amp; mingguan serta mengoordinasikan temuan dengan tim teknis dan lapangan.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= KEAHLIAN ================= -->
+<section id="zone-keahlian" data-zone="KEAHLIAN">
+  <div class="zone-tag">Z-04 // Keahlian</div>
+  <h2 class="reveal" style="font-size:clamp(1.8rem,3.6vw,2.6rem); color:#fff;">Peralatan yang saya pakai sehari-hari.</h2>
+
+  <div class="tabs reveal" id="tabs">
+    <button class="tab-btn active" data-tab="desain">Desain</button>
+    <button class="tab-btn" data-tab="bangun">Bangun</button>
+    <button class="tab-btn" data-tab="analisis">Analisis</button>
+  </div>
+
+  <div class="skill-panel active reveal" data-panel="desain">
+    <span class="chip">Figma</span><span class="chip">Adobe XD</span><span class="chip">Sketch</span><span class="chip">InVision</span>
+    <span class="chip">Wireframing &amp; Prototyping</span><span class="chip">Riset Pengguna</span><span class="chip">Usability Testing</span>
+  </div>
+  <div class="skill-panel reveal" data-panel="bangun">
+    <span class="chip">Pengembangan Website</span><span class="chip">Desain Aplikasi Web &amp; Mobile</span><span class="chip">Studi Kasus: GoHijau</span><span class="chip">Studi Kasus: PKMRI Bogor</span>
+  </div>
+  <div class="skill-panel reveal" data-panel="analisis">
+    <span class="chip">Analisis Data</span><span class="chip">Pemantauan Sistem SCADA</span><span class="chip">Manajemen Basis Data</span><span class="chip">Sistem Informasi</span>
+  </div>
+</section>
+
+<!-- ================= PENDIDIKAN ================= -->
+<section id="zone-pendidikan" data-zone="PENDIDIKAN">
+  <div class="zone-tag">Z-05 // Pendidikan</div>
+  <div class="edu-card reveal">
+    <div>
+      <h3>S1 Sistem Informasi</h3>
+      <div class="org">Institut Bisnis Informatika Kesatuan · Semester 6 (Berjalan)</div>
+    </div>
+    <div class="gpa-ring"><span>3.5</span></div>
+  </div>
+</section>
+
+<!-- ================= KONTAK ================= -->
+<footer id="zone-kontak" data-zone="KONTAK">
+  <div class="zone-tag">Z-06 // Kontak</div>
+  <div class="contact-panel reveal">
+    <h2>Terbuka untuk kesempatan magang.</h2>
+    <div class="status-line"><span class="dot" style="width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block;"></span>SIAP DITEMPATKAN DI JAKARTA</div>
+
+    <div class="contact-data mono">
+      <div class="contact-data-row"><span class="cd-lbl">EMAIL</span><a href="mailto:fransiscapasaribu25@gmail.com">fransiscapasaribu25@gmail.com</a></div>
+      <div class="contact-data-row"><span class="cd-lbl">TELEPON</span><a href="tel:+6281260968468">0812-6096-8468</a></div>
+    </div>
+
+    <div class="contact-links">
+      <a class="btn btn-primary" href="mailto:fransiscapasaribu25@gmail.com">Kirim Email</a>
+      <a class="btn btn-ghost" href="https://github.com/fransiscapasaribu" target="_blank" rel="noopener">GitHub ↗️</a>
+      <a class="btn btn-ghost" href="tel:+6281260968468">Telepon Saya</a>
+    </div>
+  </div>
+  <div class="footnote">
+    <span>FRANSISCA AGNES MONALISA PASARIBU ©️ 2026</span>
+    <span>PEMATANGSIANTAR, INDONESIA</span>
+  </div>
+</footer>
+
+<script>
+  // Reveal on scroll
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); } });
+  }, {threshold:0.15});
+  reveals.forEach(el=>io.observe(el));
+
+  // Rail zone dots
+  const zones = document.querySelectorAll('section, .hero');
+  const railZones = document.getElementById('rail-zones');
+  const zoneEls = Array.from(document.querySelectorAll('[data-zone]'));
+  zoneEls.forEach((el, i)=>{
+    const dot = document.createElement('div');
+    dot.className = 'zone-dot';
+    dot.style.top = ((i/(zoneEls.length-1))*100) + '%';
+    dot.dataset.target = el.id;
+    railZones.appendChild(dot);
+  });
+  const dots = document.querySelectorAll('.zone-dot');
+  const zoneIO = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      const id = entry.target.id;
+      const dot = document.querySelector('.zone-dot[data-target="'+id+'"]');
+      if(entry.isIntersecting && dot){
+        dots.forEach(d=>d.classList.remove('active'));
+        dot.classList.add('active');
+      }
+    });
+  }, {threshold:0.4});
+  zoneEls.forEach(el=>zoneIO.observe(el));
+
+  // Project card toggle
+  document.querySelectorAll('[data-card]').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      card.classList.toggle('open');
+    });
+  });
+
+  // Skill tabs
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.skill-panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelector('.skill-panel[data-panel="'+btn.dataset.tab+'"]').classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
